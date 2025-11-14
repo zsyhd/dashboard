@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد دیپلوی شده</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; }
+        pre { background: #eee; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .summary-box { border: 1px solid #ccc; padding: 15px; margin-top: 20px; border-radius: 5px; }
+        .summary-box p { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>داشبورد داده‌های API</h1>
+        <div id="loading">در حال بارگذاری داده‌ها...</div>
+        <div id="dashboard-data" style="display:none;">
+            <h2>خلاصه (Summary)</h2>
+            <div class="summary-box" id="summary-output"></div>
+            
+            <h2>داده‌های خام (JSON)</h2>
+            <pre id="raw-json"></pre>
+        </div>
+    </div>
+
+    <script>
+        // آدرس API شما (مسیر اصلی که داده‌های داشبورد را برمی‌گرداند)
+        const API_URL = window.location.origin + '/'; 
+
+        fetch(API_URL)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard-data').style.display = 'block';
+
+                // نمایش داده‌های خام
+                document.getElementById('raw-json').textContent = JSON.stringify(data, null, 2);
+
+                // نمایش خلاصه
+                const summary = data.summary;
+                const summaryOutput = document.getElementById('summary-output');
+                summaryOutput.innerHTML = `
+                    <p><strong>تعداد کل رویدادها:</strong> ${summary.totalEvents}</p>
+                    <p><strong>تعداد چاه‌ها:</strong> ${summary.wellCount}</p>
+                    <p><strong>نرخ ناهنجاری:</strong> ${summary.anomalyRate}</p>
+                    <p><strong>میانگین فشار:</strong> ${summary.avgPressure}</p>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('loading').textContent = 'خطا در بارگذاری داده‌ها: ' + error.message;
+                console.error('Fetch error:', error);
+            });
+    </script>
+</body>
+</html>
